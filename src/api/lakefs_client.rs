@@ -1,4 +1,5 @@
 use crate::errors::ClientError;
+use crate::utils::get_response;
 use crate::LakeApiEndpoint::{PreSetup, Repository, SetupAdmin};
 use crate::{AuthInfo, Config, LakeApiEndpoint, Repositories};
 use log::info;
@@ -44,19 +45,10 @@ impl LakeFsClient {
         Err(ClientError::Init("setup admin error".to_string()))
     }
 
-    fn get_api_endpoint(&self, endpoint: LakeApiEndpoint) -> String {
-        let url = endpoint.to_endpoint(
-            self.cfg.lakefs_endpoint.clone(),
-            self.cfg.lakefs_api_version.clone(),
-        );
-        info!("request {}", url);
-        url
-    }
-
     async fn make_get_request(&self, api: LakeApiEndpoint) -> Result<Value, ClientError> {
         let result = self
             .client
-            .get(self.get_api_endpoint(api))
+            .get(self.cfg.get_api_endpoint(api))
             .basic_auth(
                 &self.cfg.lakefs_access_key,
                 Some(&self.cfg.lakefs_secret_key),
@@ -78,7 +70,7 @@ impl LakeFsClient {
     {
         let result = self
             .client
-            .post(self.get_api_endpoint(api))
+            .post(self.cfg.get_api_endpoint(api))
             .basic_auth(
                 &self.cfg.lakefs_access_key,
                 Some(&self.cfg.lakefs_secret_key),
@@ -88,7 +80,7 @@ impl LakeFsClient {
             .await?
             .json::<Value>()
             .await?;
-        self.get_response(result)
+        get_response(result)
     }
 
     pub async fn pre_setup(&self, email: String) -> Result<bool, ClientError> {
@@ -140,20 +132,6 @@ impl LakeFsClient {
     pub async fn get_repositories(&self) -> Result<Vec<Repositories>, ClientError> {
         let result = self.make_get_request(Repository).await?;
         let arr = result.get("results").unwrap();
-        self.get_response::<Vec<Repositories>>(arr.clone())
-    }
-    fn get_response<T>(&self, value: Value) -> Result<T, ClientError>
-    where
-        T: DeserializeOwned,
-    {
-        match serde_json::from_value(value.clone()) {
-            Ok(res) => Ok(res),
-            Err(e) => {
-                let message = value
-                    .get("message")
-                    .map_or(e.to_string(), |m| m.to_string());
-                Err(ClientError::RequestFail(message))
-            }
-        }
+        get_response::<Vec<Repositories>>(arr.clone())
     }
 }
