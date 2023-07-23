@@ -34,3 +34,18 @@ async fn test_create_repository() {
     assert_eq!(repository.storage_namespace, "s3://test");
     assert_eq!(repository.default_branch, "main");
 }
+
+#[tokio::test]
+async fn test_get_repository() {
+    set_evnvar();
+    let cfg = Config::from_env().unwrap();
+    let client = LakeFsClient::new(cfg);
+    let result = client.get_repositories().await;
+    log::info!("{:?}", result);
+    assert!(result.is_ok());
+    let repository = result.unwrap();
+    assert_eq!(repository.len(), 1);
+    let first = repository.first().unwrap();
+    assert_eq!(first.id, "test");
+    assert_eq!(first.storage_namespace, "s3://test");
+}

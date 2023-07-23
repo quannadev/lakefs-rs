@@ -9,5 +9,5 @@ pub fn set_evnvar() {
         "IZKFVbFhpvkypiD+8TB7BqgIjCg5hhzz9w5vRMTP",
     );
     env::set_var("LAKEFS_API_VERSION", "v1");
-    env_logger::init();
+    env_logger::try_init().unwrap_or_default();
 }

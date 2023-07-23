@@ -4,7 +4,7 @@ use crate::{AuthInfo, Config, LakeApiEndpoint, Repositories};
 use log::info;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug)]
@@ -68,11 +68,14 @@ impl LakeFsClient {
         Ok(result)
     }
 
-    async fn make_post_request(
+    async fn make_post_request<T>(
         &self,
         api: LakeApiEndpoint,
         body: Option<Value>,
-    ) -> Result<Value, ClientError> {
+    ) -> Result<T, ClientError>
+    where
+        T: DeserializeOwned,
+    {
         let result = self
             .client
             .post(self.get_api_endpoint(api))
@@ -85,7 +88,7 @@ impl LakeFsClient {
             .await?
             .json::<Value>()
             .await?;
-        Ok(result)
+        self.get_response(result)
     }
 
     pub async fn pre_setup(&self, email: String) -> Result<bool, ClientError> {
@@ -94,7 +97,9 @@ impl LakeFsClient {
             return Ok(true);
         }
         let body = json!({ "email": email, "featureUpdates": false, "securityUpdates": false });
-        let setup = self.make_post_request(PreSetup, Some(body)).await?;
+        let setup = self
+            .make_post_request::<Value>(PreSetup, Some(body))
+            .await?;
         info!("pre setup {}", setup);
         Ok(setup.get("nextStep").is_some())
     }
@@ -112,14 +117,8 @@ impl LakeFsClient {
             return Err(ClientError::Init("Lakefs initialized".to_string()));
         }
         let body = json!({ "username": username });
-        let result = self.make_post_request(SetupAdmin, Some(body)).await?;
-        match serde_json::from_value(result.clone()) {
-            Ok(res) => Ok(res),
-            Err(_) => {
-                let message = result.get("message");
-                Err(ClientError::RequestFail(message.unwrap().to_string()))
-            }
-        }
+        self.make_post_request::<AuthInfo>(SetupAdmin, Some(body))
+            .await
     }
 
     pub async fn create_repository(
@@ -135,12 +134,25 @@ impl LakeFsClient {
             "sample_data": false
         });
         info!("{:?}", body);
-        let result = self.make_post_request(Repository, Some(body)).await?;
-        match serde_json::from_value(result.clone()) {
+        self.make_post_request(Repository, Some(body)).await
+    }
+
+    pub async fn get_repositories(&self) -> Result<Vec<Repositories>, ClientError> {
+        let result = self.make_get_request(Repository).await?;
+        let arr = result.get("results").unwrap();
+        self.get_response::<Vec<Repositories>>(arr.clone())
+    }
+    fn get_response<T>(&self, value: Value) -> Result<T, ClientError>
+    where
+        T: DeserializeOwned,
+    {
+        match serde_json::from_value(value.clone()) {
             Ok(res) => Ok(res),
-            Err(_) => {
-                let message = result.get("message");
-                Err(ClientError::RequestFail(message.unwrap().to_string()))
+            Err(e) => {
+                let message = value
+                    .get("message")
+                    .map_or(e.to_string(), |m| m.to_string());
+                Err(ClientError::RequestFail(message))
             }
         }
     }
