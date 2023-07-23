@@ -1,0 +1,28 @@
+[package]
+name = "lakefs-rs"
+version = "1.0.0"
+edition = "2021"
+description = "lakefs client for rust"
+keywords = ["lakefs", "lakefs client"]
+authors = ["QuanNguyen <me@quanna.dev>"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+rust-version = "1.70.0"
+autotests = true
+repository = "https://github.com/quannadev/lakefs-rs"
+
+[lib]
+name = "lakefs"
+path = "src/lib.rs"
+
+[dependencies]
+reqwest = { version = "0.11.18", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+serde = {version = "1.0.174", features = ["derive"]}
+serde_json = "1.0.103"
+async-trait = "0.1.72"
+thiserror = "1.0.44"
+envy = "0.4.2"
+env_logger = "0.10.0"
+log = "0.4.19"
+validator = { version = "0.16.1", features = ["derive"] }
