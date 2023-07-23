@@ -45,10 +45,20 @@ impl LakeFsClient {
         Err(ClientError::Init("setup admin error".to_string()))
     }
 
-    async fn make_get_request(&self, api: LakeApiEndpoint) -> Result<Value, ClientError> {
+    async fn make_get_request(
+        &self,
+        api: LakeApiEndpoint,
+        path: Option<String>,
+        queries: Vec<String>,
+    ) -> Result<Value, ClientError> {
+        let url = match path {
+            Some(p) => format!("{}/{}", self.cfg.get_api_endpoint(api), p),
+            _ => self.cfg.get_api_endpoint(api),
+        };
         let result = self
             .client
-            .get(self.cfg.get_api_endpoint(api))
+            .get(url)
+            .query(&queries)
             .basic_auth(
                 &self.cfg.lakefs_access_key,
                 Some(&self.cfg.lakefs_secret_key),
@@ -97,7 +107,7 @@ impl LakeFsClient {
     }
 
     async fn check_setup(&self) -> Result<String, ClientError> {
-        let check = self.make_get_request(SetupAdmin).await?;
+        let check = self.make_get_request(SetupAdmin, None, vec![]).await?;
         let status = check.get("state").unwrap().as_str().unwrap().to_string();
         info!("check status: {}", status);
         Ok(status)
@@ -129,9 +139,25 @@ impl LakeFsClient {
         self.make_post_request(Repository, Some(body)).await
     }
 
-    pub async fn get_repositories(&self) -> Result<Vec<Repositories>, ClientError> {
-        let result = self.make_get_request(Repository).await?;
-        let arr = result.get("results").unwrap();
-        get_response::<Vec<Repositories>>(arr.clone())
+    pub async fn get_repositories(
+        &self,
+        name: Option<String>,
+    ) -> Result<Vec<Repositories>, ClientError> {
+        let result = self
+            .make_get_request(Repository, name.clone(), vec![])
+            .await?;
+        match name {
+            Some(_) => {
+                let rs = get_response::<Repositories>(result)?;
+                Ok(vec![rs])
+            }
+            _ => match result.get("results") {
+                None => {
+                    let mess = result.get("message").unwrap().to_string();
+                    Err(ClientError::RequestFail(mess))
+                }
+                Some(arr) => get_response::<Vec<Repositories>>(arr.clone()),
+            },
+        }
     }
 }

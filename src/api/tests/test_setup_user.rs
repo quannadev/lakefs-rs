@@ -40,7 +40,7 @@ async fn test_get_repository() {
     set_evnvar();
     let cfg = Config::from_env().unwrap();
     let client = LakeFsClient::new(cfg);
-    let result = client.get_repositories().await;
+    let result = client.get_repositories(None).await;
     log::info!("{:?}", result);
     assert!(result.is_ok());
     let repository = result.unwrap();
@@ -48,4 +48,9 @@ async fn test_get_repository() {
     let first = repository.first().unwrap();
     assert_eq!(first.id, "test");
     assert_eq!(first.storage_namespace, "s3://test");
+    let single_repo = client
+        .get_repositories(Some(first.id.clone()))
+        .await
+        .unwrap();
+    assert_eq!(single_repo.len(), 1);
 }
