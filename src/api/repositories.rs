@@ -1,22 +1,21 @@
+use crate::api::client_core::ClientCore;
 use crate::api::core_request::CoreRequest;
 use crate::errors::ClientError;
 use crate::utils::get_response;
 use crate::LakeApiEndpoint::Repository;
-use crate::{Config, Repositories};
-use async_trait::async_trait;
+use crate::Repositories;
 use log::info;
-use reqwest::Client;
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug)]
 pub struct RepositoriesApi {
-    client: Client,
-    auth: (String, String),
-    domain: String,
-    version: String,
+    client: ClientCore,
 }
 
 impl RepositoriesApi {
+    pub fn new(client: ClientCore) -> Self {
+        Self { client }
+    }
     pub async fn create_repository(
         &self,
         name: String,
@@ -30,7 +29,9 @@ impl RepositoriesApi {
             "sample_data": false
         });
         info!("{:?}", body);
-        self.post(self.get_url(Repository), body).await
+        self.client
+            .post(self.client.get_url(Repository), body)
+            .await
     }
 
     pub async fn get_repositories(
@@ -38,10 +39,10 @@ impl RepositoriesApi {
         name: Option<String>,
     ) -> Result<Vec<Repositories>, ClientError> {
         let endpoint = match name {
-            Some(id) => format!("{}/{}", self.get_url(Repository), id),
-            _ => self.get_url(Repository),
+            Some(id) => format!("{}/{}", self.client.get_url(Repository), id),
+            _ => self.client.get_url(Repository),
         };
-        let result = self.get::<Value>(endpoint, vec![]).await?;
+        let result = self.client.get::<Value>(endpoint, vec![]).await?;
         if result.is_array() {
             result.get("results").map_or(
                 Err(ClientError::RequestFail(
@@ -53,33 +54,5 @@ impl RepositoriesApi {
             let rs = get_response::<Repositories>(result)?;
             Ok(vec![rs])
         }
-    }
-}
-
-#[async_trait]
-impl CoreRequest for RepositoriesApi {
-    fn setup(cfg: &Config, client: Client) -> Self {
-        Self {
-            client,
-            auth: (cfg.lakefs_access_key.clone(), cfg.lakefs_secret_key.clone()),
-            domain: cfg.lakefs_endpoint.clone(),
-            version: cfg.lakefs_api_version.clone(),
-        }
-    }
-
-    fn get_client(&self) -> &Client {
-        &self.client
-    }
-
-    fn get_auth(&self) -> (String, String) {
-        self.auth.clone()
-    }
-
-    fn get_domain(&self) -> String {
-        self.domain.clone()
-    }
-
-    fn get_version(&self) -> String {
-        self.version.clone()
     }
 }

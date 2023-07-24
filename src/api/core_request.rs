@@ -8,7 +8,7 @@ use serde_json::Value;
 
 #[async_trait]
 pub trait CoreRequest {
-    fn setup(cfg: &Config, client: Client) -> Self;
+    fn setup(cfg: &Config) -> Self;
     async fn get<T>(&self, endpoint: String, queries: Vec<String>) -> Result<T, ClientError>
     where
         T: DeserializeOwned,

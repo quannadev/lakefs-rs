@@ -6,3 +6,5 @@ mod tests;
 mod repositories;
 mod core_request;
 mod setup;
+mod users;
+mod client_core;

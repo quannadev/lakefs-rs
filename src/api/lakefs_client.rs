@@ -1,28 +1,22 @@
+use crate::api::client_core::ClientCore;
 use crate::api::core_request::CoreRequest;
 use crate::api::repositories::RepositoriesApi;
 use crate::api::setup::SetupApi;
 use crate::errors::ClientError;
 use crate::{AuthInfo, Config};
-use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
-use reqwest::Client;
 
 #[derive(Clone, Debug)]
 pub struct LakeFsClient {
-    cfg: Config,
     pub setup_api: SetupApi,
     pub repositories: RepositoriesApi,
 }
 
 impl LakeFsClient {
     pub fn new(cfg: Config) -> Self {
-        let mut headers = HeaderMap::new();
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
-        let client = Client::builder().default_headers(headers).build().unwrap();
-        let setup_api = SetupApi::setup(&cfg, client.clone());
-        let repositories = RepositoriesApi::setup(&cfg, client.clone());
+        let client = ClientCore::setup(&cfg);
+        let setup_api = SetupApi::new(client.clone());
+        let repositories = RepositoriesApi::new(client.clone());
         Self {
-            cfg,
             setup_api,
             repositories,
         }
@@ -33,11 +27,13 @@ impl LakeFsClient {
         admin_email: String,
         username: String,
     ) -> Result<(Self, AuthInfo), ClientError> {
-        let cfg = Config::new(endpoint, "".to_string(), "".to_string(), None);
-        let mut lakefs = LakeFsClient::new(cfg);
-        let info = lakefs.setup_api.setup_admin(admin_email, username).await?;
-        lakefs.cfg.lakefs_secret_key = info.secret_access_key.clone();
-        lakefs.cfg.lakefs_access_key = info.access_key_id.clone();
+        let mut cfg = Config::new(endpoint, "".to_string(), "".to_string(), None);
+        let client = ClientCore::setup(&cfg);
+        let setup_api = SetupApi::new(client.clone());
+        let info = setup_api.setup_admin(admin_email, username).await?;
+        cfg.lakefs_secret_key = info.secret_access_key.clone();
+        cfg.lakefs_access_key = info.access_key_id.clone();
+        let lakefs = LakeFsClient::new(cfg);
         Ok((lakefs, info))
     }
 }
