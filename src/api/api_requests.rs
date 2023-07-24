@@ -9,6 +9,7 @@ pub enum LakeApiEndpoint {
     Branches((String, Option<String>)),
     Config(Option<String>),
     Users(Option<String>),
+    Tags((String, Option<String>)),
 }
 
 impl From<LakeApiEndpoint> for String {
@@ -44,6 +45,15 @@ impl From<LakeApiEndpoint> for String {
                         p
                     )
                 },
+            ),
+            LakeApiEndpoint::Tags((repo_name, Some(path))) => format!(
+                "{}/tags/{}",
+                String::from(LakeApiEndpoint::Repository(Some(repo_name))),
+                path
+            ),
+            LakeApiEndpoint::Tags((repo_name, None)) => format!(
+                "{}/tags",
+                String::from(LakeApiEndpoint::Repository(Some(repo_name)))
             ),
         }
     }

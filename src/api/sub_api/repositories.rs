@@ -3,7 +3,7 @@ use crate::api::core_request::{CoreRequest, Response};
 use crate::api::sub_api::repository_data::{
     BranchInfo, DiffItem, RepositoryInfo, RepositoryMetadata, RevertInfo,
 };
-use crate::LakeApiEndpoint::{Branches, Repository};
+use crate::LakeApiEndpoint::{Branches, Repository, Tags};
 use crate::{QueryData, ResultData};
 use log::info;
 use serde_json::{json, Value};
@@ -155,5 +155,39 @@ impl RepositoriesApi {
         let mut url = String::from(Branches((repo_name, Some(name))));
         url.push_str("/diff");
         self.client.get(url, Some(queries)).await
+    }
+
+    pub async fn get_tags(
+        &self,
+        repo_name: String,
+        queries: QueryData,
+    ) -> Response<ResultData<BranchInfo>> {
+        let url = String::from(Tags((repo_name, None)));
+        self.client.get(url, Some(queries)).await
+    }
+
+    pub async fn create_tag(
+        &self,
+        repo_name: String,
+        id: String,
+        ref_id: String,
+    ) -> Response<BranchInfo> {
+        let url = String::from(Tags((repo_name, None)));
+        let body = json!({
+          "id": id,
+          "ref": ref_id
+        });
+        self.client.post(url, body).await
+    }
+
+    pub async fn get_tag(&self, repo_name: String, id: String) -> Response<BranchInfo> {
+        let url = String::from(Tags((repo_name, Some(id))));
+        self.client.get(url, None).await
+    }
+
+    pub async fn delete_tag(&self, repo_name: String, id: String) -> Response<()> {
+        let url = String::from(Tags((repo_name, Some(id))));
+        self.client.delete(url).await?;
+        Ok(())
     }
 }
