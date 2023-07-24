@@ -102,9 +102,15 @@ impl RepositoriesApi {
         Ok(())
     }
 
-    pub async fn get_branches(&self, repo_name: String, queries: Vec<String>) -> Response<ResultData<Vec<BranchInfo>>> {
+    pub async fn get_branches(
+        &self,
+        repo_name: String,
+        queries: Vec<String>,
+    ) -> Response<ResultData<Vec<BranchInfo>>> {
         let url = String::from(Branches((repo_name, None)));
-        self.client.get::ResultData<Vec<BranchInfo>>(url, queries).await
+        self.client
+            .get::<ResultData<Vec<BranchInfo>>>(url, queries)
+            .await
     }
 
     pub async fn get_branch(&self, repo_name: String, name: String) -> Response<BranchInfo> {
