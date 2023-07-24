@@ -4,7 +4,7 @@ use crate::LakeApiEndpoint::{PreSetup, SetupAdmin};
 use crate::{AuthInfo, Config, LakeApiEndpoint};
 use async_trait::async_trait;
 use log::info;
-use reqwest::{Client, Method, RequestBuilder};
+use reqwest::Client;
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug)]
@@ -16,6 +16,20 @@ pub struct SetupApi {
 }
 
 impl SetupApi {
+    pub async fn setup_admin(
+        &self,
+        email: String,
+        username: String,
+    ) -> Result<AuthInfo, ClientError> {
+        let next_step = self.pre_setup(email).await?;
+        info!("setup: {}", next_step);
+        if next_step {
+            let info = self.setup_user(username).await?;
+            return Ok(info);
+        }
+        Err(ClientError::Init("Setup initialized".to_string()))
+    }
+
     pub async fn pre_setup(&self, email: String) -> Result<bool, ClientError> {
         let check_status = self.check_setup().await?;
         if check_status == "comm_prefs_done" {

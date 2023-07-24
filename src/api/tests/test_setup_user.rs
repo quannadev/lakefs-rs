@@ -21,7 +21,7 @@ async fn test_create_repository() {
     set_evnvar();
     let cfg = Config::from_env().unwrap();
     let client = LakeFsClient::new(cfg);
-    let result = client
+    let result = client.repositories
         .create_repository(
             "test".to_string(),
             "s3://test".to_string(),
@@ -40,7 +40,7 @@ async fn test_get_repository() {
     set_evnvar();
     let cfg = Config::from_env().unwrap();
     let client = LakeFsClient::new(cfg);
-    let result = client.get_repositories(None).await;
+    let result = client.repositories.get_repositories(None).await;
     log::info!("{:?}", result);
     assert!(result.is_ok());
     let repository = result.unwrap();
@@ -48,7 +48,7 @@ async fn test_get_repository() {
     let first = repository.first().unwrap();
     assert_eq!(first.id, "test");
     assert_eq!(first.storage_namespace, "s3://test");
-    let single_repo = client
+    let single_repo = client.repositories
         .get_repositories(Some(first.id.clone()))
         .await
         .unwrap();

@@ -3,7 +3,6 @@ use crate::api::repositories::RepositoriesApi;
 use crate::api::setup::SetupApi;
 use crate::errors::ClientError;
 use crate::{AuthInfo, Config};
-use log::info;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE};
 use reqwest::Client;
 
@@ -36,14 +35,9 @@ impl LakeFsClient {
     ) -> Result<(Self, AuthInfo), ClientError> {
         let cfg = Config::new(endpoint, "".to_string(), "".to_string(), None);
         let mut lakefs = LakeFsClient::new(cfg);
-        let next_step = lakefs.setup_api.pre_setup(admin_email).await?;
-        info!("setup: {}", next_step);
-        if next_step {
-            let info = lakefs.setup_api.setup_user(username).await?;
-            lakefs.cfg.lakefs_secret_key = info.secret_access_key.clone();
-            lakefs.cfg.lakefs_access_key = info.access_key_id.clone();
-            return Ok((lakefs, info));
-        }
-        Err(ClientError::Init("setup admin error".to_string()))
+        let info = lakefs.setup_api.setup_admin(admin_email, username).await?;
+        lakefs.cfg.lakefs_secret_key = info.secret_access_key.clone();
+        lakefs.cfg.lakefs_access_key = info.access_key_id.clone();
+        Ok((lakefs, info))
     }
 }

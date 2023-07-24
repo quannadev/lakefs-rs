@@ -5,7 +5,7 @@ use crate::LakeApiEndpoint::Repository;
 use crate::{Config, LakeApiEndpoint, Repositories};
 use async_trait::async_trait;
 use log::info;
-use reqwest::{Client, Method, RequestBuilder};
+use reqwest::{Client};
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug)]
