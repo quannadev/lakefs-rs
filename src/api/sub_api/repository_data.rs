@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RepositoryMetadata {
     #[serde(rename = "additionalProp1")]
     additional_prop1: String,
@@ -31,13 +31,31 @@ pub struct RevertInfo {
     pub parent_number: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct DiffItem {
     #[serde(rename = "type")]
     item_type: String,
     path: String,
     path_type: String,
     size_bytes: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CommitBody {
+    pub message: String,
+    pub meta: RepositoryMetadata,
+    pub date: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CommitData {
+    id: String,
+    parents: Vec<String>,
+    committer: String,
+    message: String,
+    creation_date: u64,
+    meta_range_id: String,
+    metadata: RepositoryMetadata,
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
 use crate::api::sub_api::repository_data::{
-    BranchInfo, DiffItem, RepositoryInfo, RepositoryMetadata, RevertInfo,
+    BranchInfo, CommitBody, CommitData, DiffItem, RepositoryInfo, RepositoryMetadata, RevertInfo,
 };
 use crate::LakeApiEndpoint::{Branches, Repository, Tags};
 use crate::{QueryData, ResultData};
@@ -155,6 +155,25 @@ impl RepositoriesApi {
         let mut url = String::from(Branches((repo_name, Some(name))));
         url.push_str("/diff");
         self.client.get(url, Some(queries)).await
+    }
+
+    pub async fn commit(
+        &self,
+        repo_name: String,
+        name: String,
+        commit_body: CommitBody,
+    ) -> Response<CommitData> {
+        let mut url = String::from(Branches((repo_name, Some(name))));
+        url.push_str("/commits");
+        let body = serde_json::to_value(commit_body)?;
+        self.client.post(url, body).await
+    }
+
+    pub async fn get_commit(&self, repo_name: String, commit_id: String) -> Response<CommitData> {
+        let mut url = String::from(Repository(Some(repo_name)));
+        url.push_str("/commits/");
+        url.push_str(&commit_id);
+        self.client.get(url, None).await
     }
 
     pub async fn get_tags(
