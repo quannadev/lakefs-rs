@@ -48,9 +48,7 @@ impl RepositoriesApi {
 
     pub async fn get_repositories(&self) -> Response<ResultData<Vec<RepositoryInfo>>> {
         let endpoint = self.client.get_url(Repository(None));
-        self.client
-            .get::<ResultData<Vec<RepositoryInfo>>>(endpoint, None)
-            .await
+        self.client.get(endpoint, None).await
     }
 
     /// # Get Repository Info
@@ -63,7 +61,7 @@ impl RepositoriesApi {
     ///
     pub async fn get_repository(&self, repo_name: String) -> Response<RepositoryInfo> {
         let endpoint = self.client.get_url(Repository(Some(repo_name)));
-        self.client.get::<RepositoryInfo>(endpoint, None).await
+        self.client.get(endpoint, None).await
     }
 
     /// # Delete Repository
@@ -84,7 +82,7 @@ impl RepositoriesApi {
             "{}/metadata",
             self.client.get_url(Repository(Some(repo_name)))
         );
-        self.client.get::<RepositoryMetadata>(url, None).await
+        self.client.get(url, None).await
     }
 
     pub async fn create_branch(
@@ -108,14 +106,12 @@ impl RepositoriesApi {
         queries: QueryData,
     ) -> Response<ResultData<Vec<BranchInfo>>> {
         let url = String::from(Branches((repo_name, None)));
-        self.client
-            .get::<ResultData<Vec<BranchInfo>>>(url, Some(queries))
-            .await
+        self.client.get(url, Some(queries)).await
     }
 
     pub async fn get_branch(&self, repo_name: String, name: String) -> Response<BranchInfo> {
         let url = String::from(Branches((repo_name, Some(name))));
-        self.client.get::<BranchInfo>(url, None).await
+        self.client.get(url, None).await
     }
 
     pub async fn del_branch(&self, repo_name: String, name: String) -> Response<()> {
@@ -158,8 +154,6 @@ impl RepositoriesApi {
     ) -> Response<ResultData<Vec<DiffItem>>> {
         let mut url = String::from(Branches((repo_name, Some(name))));
         url.push_str("/diff");
-        self.client
-            .get::<ResultData<Vec<DiffItem>>>(url, Some(queries))
-            .await
+        self.client.get(url, Some(queries)).await
     }
 }

@@ -8,6 +8,7 @@ pub enum LakeApiEndpoint {
     Auth(String),
     Branches((String, Option<String>)),
     Config(Option<String>),
+    Users(Option<String>),
 }
 
 impl From<LakeApiEndpoint> for String {
@@ -30,6 +31,19 @@ impl From<LakeApiEndpoint> for String {
             LakeApiEndpoint::Branches((repo_name, None)) => format!(
                 "{}/branches",
                 String::from(LakeApiEndpoint::Repository(Some(repo_name)))
+            ),
+            LakeApiEndpoint::Users(path) => path.map_or(
+                format!(
+                    "{}",
+                    String::from(LakeApiEndpoint::Auth("users".to_string()))
+                ),
+                |p| {
+                    format!(
+                        "{}/{}",
+                        String::from(LakeApiEndpoint::Auth("users".to_string())),
+                        p
+                    )
+                },
             ),
         }
     }
