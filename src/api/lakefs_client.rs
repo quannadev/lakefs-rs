@@ -19,7 +19,7 @@ impl LakeFsClient {
         Self {
             setup_api: SetupApi::new(client.clone()),
             repositories_api: RepositoriesApi::new(client.clone()),
-            user_api: UserApi::new(client.clone()),
+            user_api: UserApi::new(client),
         }
     }
 
