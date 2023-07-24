@@ -1,10 +1,10 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
 use crate::api::sub_api::repository_data::{
-    BranchInfo, RepositoryInfo, RepositoryMetadata, RevertInfo,
+    BranchInfo, DiffItem, RepositoryInfo, RepositoryMetadata, RevertInfo,
 };
 use crate::LakeApiEndpoint::{Branches, Repository};
-use crate::ResultData;
+use crate::{QueryData, ResultData};
 use log::info;
 use serde_json::{json, Value};
 
@@ -49,7 +49,7 @@ impl RepositoriesApi {
     pub async fn get_repositories(&self) -> Response<ResultData<Vec<RepositoryInfo>>> {
         let endpoint = self.client.get_url(Repository(None));
         self.client
-            .get::<ResultData<Vec<RepositoryInfo>>>(endpoint, vec![])
+            .get::<ResultData<Vec<RepositoryInfo>>>(endpoint, None)
             .await
     }
 
@@ -63,7 +63,7 @@ impl RepositoriesApi {
     ///
     pub async fn get_repository(&self, repo_name: String) -> Response<RepositoryInfo> {
         let endpoint = self.client.get_url(Repository(Some(repo_name)));
-        self.client.get::<RepositoryInfo>(endpoint, vec![]).await
+        self.client.get::<RepositoryInfo>(endpoint, None).await
     }
 
     /// # Delete Repository
@@ -84,7 +84,7 @@ impl RepositoriesApi {
             "{}/metadata",
             self.client.get_url(Repository(Some(repo_name)))
         );
-        self.client.get::<RepositoryMetadata>(url, vec![]).await
+        self.client.get::<RepositoryMetadata>(url, None).await
     }
 
     pub async fn create_branch(
@@ -105,17 +105,17 @@ impl RepositoriesApi {
     pub async fn get_branches(
         &self,
         repo_name: String,
-        queries: Vec<String>,
+        queries: QueryData,
     ) -> Response<ResultData<Vec<BranchInfo>>> {
         let url = String::from(Branches((repo_name, None)));
         self.client
-            .get::<ResultData<Vec<BranchInfo>>>(url, queries)
+            .get::<ResultData<Vec<BranchInfo>>>(url, Some(queries))
             .await
     }
 
     pub async fn get_branch(&self, repo_name: String, name: String) -> Response<BranchInfo> {
         let url = String::from(Branches((repo_name, Some(name))));
-        self.client.get::<BranchInfo>(url, vec![]).await
+        self.client.get::<BranchInfo>(url, None).await
     }
 
     pub async fn del_branch(&self, repo_name: String, name: String) -> Response<()> {
@@ -141,12 +141,25 @@ impl RepositoriesApi {
         &self,
         repo_name: String,
         name: String,
-        revert: RevertInfo,
+        cherry: RevertInfo,
     ) -> Response<()> {
         let mut url = String::from(Branches((repo_name, Some(name))));
         url.push_str("/cherry-pick");
-        let body = serde_json::to_value(revert)?;
+        let body = serde_json::to_value(cherry)?;
         self.client.post(url, body).await?;
         Ok(())
+    }
+
+    pub async fn get_diff_branch(
+        &self,
+        repo_name: String,
+        name: String,
+        queries: QueryData,
+    ) -> Response<ResultData<Vec<DiffItem>>> {
+        let mut url = String::from(Branches((repo_name, Some(name))));
+        url.push_str("/diff");
+        self.client
+            .get::<ResultData<Vec<DiffItem>>>(url, Some(queries))
+            .await
     }
 }

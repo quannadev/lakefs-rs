@@ -31,6 +31,15 @@ pub struct RevertInfo {
     pub parent_number: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct DiffItem {
+    #[serde(rename = "type")]
+    item_type: String,
+    path: String,
+    path_type: String,
+    size_bytes: u64,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

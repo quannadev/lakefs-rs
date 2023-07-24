@@ -28,12 +28,12 @@ impl SetupApi {
 
     pub async fn get_version(&self) -> Response<LakefsVersion> {
         let url = self.client.get_url(Config(None));
-        self.client.get::<LakefsVersion>(url, vec![]).await
+        self.client.get::<LakefsVersion>(url, None).await
     }
 
     pub async fn get_storage_config(&self) -> Response<BlockstoreConfig> {
         let url = self.client.get_url(Config(Some("storage".to_string())));
-        self.client.get::<BlockstoreConfig>(url, vec![]).await
+        self.client.get::<BlockstoreConfig>(url, None).await
     }
 
     pub async fn pre_setup(&self, email: String) -> Response<bool> {
@@ -50,7 +50,7 @@ impl SetupApi {
 
     async fn check_setup(&self) -> Response<String> {
         let endpoint = self.client.get_url(SetupAdmin);
-        let check = self.client.get::<Value>(endpoint, vec![]).await?;
+        let check = self.client.get::<Value>(endpoint, None).await?;
         let status = check.get("state").unwrap().as_str().unwrap().to_string();
         info!("check status: {}", status);
         Ok(status)

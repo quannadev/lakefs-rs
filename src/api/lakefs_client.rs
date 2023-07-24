@@ -1,10 +1,10 @@
 use crate::api::client_core::ClientCore;
-use crate::api::core_request::CoreRequest;
+use crate::api::core_request::{CoreRequest, Response};
 use crate::api::sub_api::repositories::RepositoriesApi;
 use crate::api::sub_api::setup::SetupApi;
 use crate::api::sub_api::users::UserApi;
-use crate::errors::ClientError;
-use crate::{AuthInfo, Config};
+use crate::api::sub_api::AuthInfo;
+use crate::Config;
 
 #[derive(Clone, Debug)]
 pub struct LakeFsClient {
@@ -27,7 +27,7 @@ impl LakeFsClient {
         endpoint: String,
         admin_email: String,
         username: String,
-    ) -> Result<(Self, AuthInfo), ClientError> {
+    ) -> Response<(Self, AuthInfo)> {
         let mut cfg = Config::new(endpoint, "".to_string(), "".to_string(), None);
         let client = ClientCore::setup(&cfg);
         let setup_api = SetupApi::new(client.clone());

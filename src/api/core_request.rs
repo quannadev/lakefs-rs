@@ -1,6 +1,6 @@
 use crate::errors::ClientError;
 use crate::utils::get_response;
-use crate::{Config, LakeApiEndpoint};
+use crate::{Config, LakeApiEndpoint, QueryData};
 use async_trait::async_trait;
 use reqwest::{Client, Method, RequestBuilder};
 use serde::de::DeserializeOwned;
@@ -10,12 +10,15 @@ pub type Response<T> = Result<T, ClientError>;
 #[async_trait]
 pub trait CoreRequest {
     fn setup(cfg: &Config) -> Self;
-    async fn get<T>(&self, endpoint: String, queries: Vec<String>) -> Response<T>
+    async fn get<T>(&self, endpoint: String, queries: Option<QueryData>) -> Response<T>
     where
         T: DeserializeOwned,
     {
         let client = self.make_request(endpoint, Method::GET);
-        let result = client.query(&queries).send().await?.json::<Value>().await?;
+        let result = match queries {
+            None => client.send().await?.json::<Value>().await?,
+            Some(q) => client.query(&q).send().await?.json::<Value>().await?,
+        };
         get_response(result)
     }
     async fn post<T>(&self, endpoint: String, body: Value) -> Response<T>

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use serde::{Deserialize, Serialize};
 
 pub enum LakeApiEndpoint {
@@ -43,16 +44,15 @@ pub struct Pagination {
 }
 
 #[derive(Debug, Deserialize)]
-struct ResultItem {
-    #[serde(rename = "type")]
-    item_type: String,
-    path: String,
-    path_type: String,
-    size_bytes: u64,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct ResultData<T> {
     pagination: Pagination,
     results: T,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct QueryData {
+    pub after: Option<String>,
+    pub amount: Option<u64>,
+    pub prefix: Option<String>,
+    pub delimiter: Option<String>,
 }
