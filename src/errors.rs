@@ -9,7 +9,7 @@ pub enum ClientError {
     #[error("validation error: {0}")]
     Validation(String),
     #[error("serialize error")]
-    Serialization(serde_json::Error),
+    Serialization(#[from] serde_json::Error),
     #[error("request error: {0}")]
     RequestFail(String),
 }

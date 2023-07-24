@@ -1,24 +1,25 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::CoreRequest;
-use crate::api::repositories::RepositoriesApi;
-use crate::api::setup::SetupApi;
+use crate::api::sub_api::repositories::RepositoriesApi;
+use crate::api::sub_api::setup::SetupApi;
+use crate::api::sub_api::users::UserApi;
 use crate::errors::ClientError;
 use crate::{AuthInfo, Config};
 
 #[derive(Clone, Debug)]
 pub struct LakeFsClient {
     pub setup_api: SetupApi,
-    pub repositories: RepositoriesApi,
+    pub repositories_api: RepositoriesApi,
+    pub user_api: UserApi,
 }
 
 impl LakeFsClient {
     pub fn new(cfg: Config) -> Self {
         let client = ClientCore::setup(&cfg);
-        let setup_api = SetupApi::new(client.clone());
-        let repositories = RepositoriesApi::new(client.clone());
         Self {
-            setup_api,
-            repositories,
+            setup_api: SetupApi::new(client.clone()),
+            repositories_api: RepositoriesApi::new(client.clone()),
+            user_api: UserApi::new(client.clone()),
         }
     }
 

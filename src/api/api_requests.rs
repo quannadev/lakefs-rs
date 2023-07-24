@@ -1,8 +1,12 @@
 use serde::{Deserialize, Serialize};
+
 pub enum LakeApiEndpoint {
     PreSetup,
     SetupAdmin,
-    Repository,
+    Repository(Option<String>),
+    Auth(String),
+    Branches((String, Option<String>)),
+    Config(Option<String>),
 }
 
 impl From<LakeApiEndpoint> for String {
@@ -10,29 +14,45 @@ impl From<LakeApiEndpoint> for String {
         match value {
             LakeApiEndpoint::PreSetup => "setup_comm_prefs".to_string(),
             LakeApiEndpoint::SetupAdmin => "setup_lakefs".to_string(),
-            LakeApiEndpoint::Repository => "repositories".to_string(),
+            LakeApiEndpoint::Repository(path) => path.map_or("repositories".to_string(), |p| {
+                format!("repositories/{}", p)
+            }),
+            LakeApiEndpoint::Config(path) => {
+                path.map_or("config".to_string(), |p| format!("config/{}", p))
+            }
+            LakeApiEndpoint::Auth(path) => format!("auth/{}", path),
+            LakeApiEndpoint::Branches((repo_name, Some(branch_name))) => format!(
+                "{}/branches/{}",
+                String::from(LakeApiEndpoint::Repository(Some(repo_name))),
+                branch_name
+            ),
+            LakeApiEndpoint::Branches((repo_name, None)) => format!(
+                "{}/branches",
+                String::from(LakeApiEndpoint::Repository(Some(repo_name)))
+            ),
         }
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AuthInfo {
-    pub access_key_id: String,
-    pub secret_access_key: String,
-    pub creation_date: u64,
+#[derive(Debug, Deserialize)]
+pub struct Pagination {
+    has_more: bool,
+    next_offset: String,
+    results: u64,
+    max_per_page: u64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
-pub struct Repositories {
-    pub id: String,
-    pub default_branch: String,
-    pub storage_namespace: String,
-    pub creation_date: u64,
+#[derive(Debug, Deserialize)]
+struct ResultItem {
+    #[serde(rename = "type")]
+    item_type: String,
+    path: String,
+    path_type: String,
+    size_bytes: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(untagged)]
-pub enum ResponseType {
-    Ok(),
-    Error(),
+#[derive(Debug, Deserialize)]
+pub struct ResultData<T> {
+    pagination: Pagination,
+    results: T,
 }

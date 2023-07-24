@@ -1,6 +1,4 @@
 use crate::errors::ClientError;
-use crate::LakeApiEndpoint;
-use log::info;
 use serde::Deserialize;
 use std::env;
 use validator::Validate;
@@ -37,14 +35,6 @@ impl Config {
             Ok(_) => Ok(cfg),
             Err(e) => Err(ClientError::Validation(e.to_string())),
         }
-    }
-    pub fn get_api_endpoint(&self, endpoint: LakeApiEndpoint) -> String {
-        let url = endpoint.to_endpoint(
-            self.lakefs_endpoint.clone(),
-            self.lakefs_api_version.clone(),
-        );
-        info!("request {}", url);
-        url
     }
 }
 

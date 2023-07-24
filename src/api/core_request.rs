@@ -5,11 +5,12 @@ use async_trait::async_trait;
 use reqwest::{Client, Method, RequestBuilder};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+pub type Response<T> = Result<T, ClientError>;
 
 #[async_trait]
 pub trait CoreRequest {
     fn setup(cfg: &Config) -> Self;
-    async fn get<T>(&self, endpoint: String, queries: Vec<String>) -> Result<T, ClientError>
+    async fn get<T>(&self, endpoint: String, queries: Vec<String>) -> Response<T>
     where
         T: DeserializeOwned,
     {
@@ -17,7 +18,7 @@ pub trait CoreRequest {
         let result = client.query(&queries).send().await?.json::<Value>().await?;
         get_response(result)
     }
-    async fn post<T>(&self, endpoint: String, body: Value) -> Result<T, ClientError>
+    async fn post<T>(&self, endpoint: String, body: Value) -> Response<T>
     where
         T: DeserializeOwned,
     {
@@ -25,7 +26,7 @@ pub trait CoreRequest {
         let result = client.json(&body).send().await?.json::<Value>().await?;
         get_response(result)
     }
-    async fn delete<T>(&self, endpoint: String) -> Result<T, ClientError>
+    async fn delete<T>(&self, endpoint: String) -> Response<T>
     where
         T: DeserializeOwned,
     {
@@ -33,7 +34,7 @@ pub trait CoreRequest {
         let result = client.send().await?.json::<Value>().await?;
         get_response(result)
     }
-    async fn update<T>(&self, endpoint: String, body: Value) -> Result<T, ClientError>
+    async fn update<T>(&self, endpoint: String, body: Value) -> Response<T>
     where
         T: DeserializeOwned,
     {
@@ -42,12 +43,14 @@ pub trait CoreRequest {
         get_response(result)
     }
     fn get_client(&self) -> &Client;
+
     fn make_request(&self, endpoint: String, method: Method) -> RequestBuilder {
         let auth = self.get_auth();
         self.get_client()
             .request(method, endpoint)
             .basic_auth(auth.0, Some(auth.1))
     }
+
     fn get_url(&self, api: LakeApiEndpoint) -> String {
         let url = String::from(api);
         let domain = self.get_domain();
