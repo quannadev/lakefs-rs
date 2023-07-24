@@ -2,10 +2,10 @@ use crate::api::core_request::CoreRequest;
 use crate::errors::ClientError;
 use crate::utils::get_response;
 use crate::LakeApiEndpoint::Repository;
-use crate::{Config, LakeApiEndpoint, Repositories};
+use crate::{Config, Repositories};
 use async_trait::async_trait;
 use log::info;
-use reqwest::{Client};
+use reqwest::Client;
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug)]
@@ -43,13 +43,12 @@ impl RepositoriesApi {
         };
         let result = self.get::<Value>(endpoint, vec![]).await?;
         if result.is_array() {
-            match result.get("results") {
-                None => {
-                    let mess = result.get("message").unwrap().to_string();
-                    Err(ClientError::RequestFail(mess))
-                }
-                Some(arr) => get_response::<Vec<Repositories>>(arr.clone()),
-            }
+            result.get("results").map_or(
+                Err(ClientError::RequestFail(
+                    "get repositories failed".to_string(),
+                )),
+                |arr| get_response::<Vec<Repositories>>(arr.clone()),
+            )
         } else {
             let rs = get_response::<Repositories>(result)?;
             Ok(vec![rs])
@@ -72,11 +71,15 @@ impl CoreRequest for RepositoriesApi {
         &self.client
     }
 
-    fn get_url(&self, api: LakeApiEndpoint) -> String {
-        api.to_endpoint(self.domain.clone(), self.version.clone())
-    }
-
     fn get_auth(&self) -> (String, String) {
         self.auth.clone()
+    }
+
+    fn get_domain(&self) -> String {
+        self.domain.clone()
+    }
+
+    fn get_version(&self) -> String {
+        self.version.clone()
     }
 }

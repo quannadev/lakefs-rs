@@ -5,14 +5,13 @@ pub enum LakeApiEndpoint {
     Repository,
 }
 
-impl LakeApiEndpoint {
-    pub fn to_endpoint(&self, domain: String, version: String) -> String {
-        let url = match self {
+impl From<LakeApiEndpoint> for String {
+    fn from(value: LakeApiEndpoint) -> Self {
+        match value {
             LakeApiEndpoint::PreSetup => "setup_comm_prefs".to_string(),
             LakeApiEndpoint::SetupAdmin => "setup_lakefs".to_string(),
             LakeApiEndpoint::Repository => "repositories".to_string(),
-        };
-        format!("{domain}/api/{version}/{url}")
+        }
     }
 }
 

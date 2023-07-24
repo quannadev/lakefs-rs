@@ -75,12 +75,16 @@ impl CoreRequest for SetupApi {
     fn get_client(&self) -> &Client {
         &self.client
     }
-
-    fn get_url(&self, api: LakeApiEndpoint) -> String {
-        api.to_endpoint(self.domain.clone(), self.version.clone())
-    }
-
+    
     fn get_auth(&self) -> (String, String) {
         self.auth.clone()
+    }
+
+    fn get_domain(&self) -> String {
+        self.domain.clone()
+    }
+
+    fn get_version(&self) -> String {
+        self.version.clone()
     }
 }

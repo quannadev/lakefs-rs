@@ -48,6 +48,13 @@ pub trait CoreRequest {
             .request(method, endpoint)
             .basic_auth(auth.0, Some(auth.1))
     }
-    fn get_url(&self, api: LakeApiEndpoint) -> String;
+    fn get_url(&self, api: LakeApiEndpoint) -> String {
+        let url = String::from(api);
+        let domain = self.get_domain();
+        let version = self.get_version();
+        format!("{domain}/api/{version}/{url}")
+    }
     fn get_auth(&self) -> (String, String);
+    fn get_domain(&self) -> String;
+    fn get_version(&self) -> String;
 }
