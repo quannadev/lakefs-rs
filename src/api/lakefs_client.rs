@@ -1,5 +1,6 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
+use crate::api::sub_api::group_api::GroupApi;
 use crate::api::sub_api::repositories::RepositoriesApi;
 use crate::api::sub_api::setup::SetupApi;
 use crate::api::sub_api::users::UserApi;
@@ -11,6 +12,7 @@ pub struct LakeFsClient {
     pub setup_api: SetupApi,
     pub repositories_api: RepositoriesApi,
     pub user_api: UserApi,
+    pub user_group_api: GroupApi,
 }
 
 impl LakeFsClient {
@@ -19,7 +21,8 @@ impl LakeFsClient {
         Self {
             setup_api: SetupApi::new(client.clone()),
             repositories_api: RepositoriesApi::new(client.clone()),
-            user_api: UserApi::new(client),
+            user_api: UserApi::new(client.clone()),
+            user_group_api: GroupApi::new(client),
         }
     }
 

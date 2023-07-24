@@ -1,5 +1,5 @@
 use crate::utils::set_evnvar;
-use crate::{Config, LakeFsClient};
+use crate::{Config, LakeFsClient, QueryData};
 
 #[tokio::test]
 async fn test_setup_admin() {
@@ -41,11 +41,14 @@ async fn test_get_repository() {
     set_evnvar();
     let cfg = Config::from_env().unwrap();
     let client = LakeFsClient::new(cfg);
-    let result = client.repositories_api.get_repositories().await;
+    let result = client
+        .repositories_api
+        .get_repositories(QueryData::default())
+        .await;
     log::info!("{:?}", result);
     assert!(result.is_ok());
     let repository = result.unwrap();
-    assert_eq!(repository.len(), 1);
+    assert_eq!(repository.results.len(), 1);
     let first = client
         .repositories_api
         .get_repository("test".to_string())

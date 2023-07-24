@@ -6,10 +6,10 @@ use std::env;
 pub fn set_evnvar() {
     env::set_var("RUST_LOG", "INFO");
     env::set_var("LAKEFS_ENDPOINT", "http://localhost:8000");
-    env::set_var("LAKEFS_ACCESS_KEY", "AKIAJWOBNKM7IZS6DVTQ");
+    env::set_var("LAKEFS_ACCESS_KEY", "AKIAJUVSF66ADRQ5X5TQ");
     env::set_var(
         "LAKEFS_SECRET_KEY",
-        "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",
+        "340JlHXom2i6TGoWhhducbMo5PpLkQXje22GyPmw",
     );
     env::set_var("LAKEFS_API_VERSION", "v1");
     env_logger::try_init().unwrap_or_default();

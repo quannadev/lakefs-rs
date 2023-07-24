@@ -10,6 +10,7 @@ pub enum LakeApiEndpoint {
     Config(Option<String>),
     Users(Option<String>),
     Tags((String, Option<String>)),
+    UserGroup(Option<String>),
 }
 
 impl From<LakeApiEndpoint> for String {
@@ -46,6 +47,19 @@ impl From<LakeApiEndpoint> for String {
                     )
                 },
             ),
+            LakeApiEndpoint::UserGroup(path) => path.map_or(
+                format!(
+                    "{}",
+                    String::from(LakeApiEndpoint::Auth("groups".to_string()))
+                ),
+                |p| {
+                    format!(
+                        "{}/{}",
+                        String::from(LakeApiEndpoint::Auth("groups".to_string())),
+                        p
+                    )
+                },
+            ),
             LakeApiEndpoint::Tags((repo_name, Some(path))) => format!(
                 "{}/tags/{}",
                 String::from(LakeApiEndpoint::Repository(Some(repo_name))),
@@ -61,19 +75,19 @@ impl From<LakeApiEndpoint> for String {
 
 #[derive(Debug, Deserialize)]
 pub struct Pagination {
-    has_more: bool,
-    next_offset: String,
-    results: u64,
-    max_per_page: u64,
+    pub has_more: bool,
+    pub next_offset: String,
+    pub results: u64,
+    pub max_per_page: u64,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ResultData<T> {
-    pagination: Pagination,
-    results: T,
+    pub pagination: Pagination,
+    pub results: T,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct QueryData {
     pub after: Option<String>,
     pub amount: Option<u64>,

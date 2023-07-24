@@ -2,6 +2,7 @@ use crate::errors::ClientError;
 use crate::utils::get_response;
 use crate::{Config, LakeApiEndpoint, QueryData};
 use async_trait::async_trait;
+use log::info;
 use reqwest::{Client, Method, RequestBuilder};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
@@ -29,15 +30,19 @@ pub trait CoreRequest {
         let result = client.json(&body).send().await?.json::<Value>().await?;
         get_response(result)
     }
-    async fn delete<T>(&self, endpoint: String) -> Response<T>
-    where
-        T: DeserializeOwned,
-    {
-        let client = self.make_request(endpoint, Method::DELETE);
-        let result = client.send().await?.json::<Value>().await?;
-        get_response(result)
+
+    async fn post_without_parse(&self, endpoint: String, body: Value) -> Response<bool> {
+        let client = self.make_request(endpoint, Method::POST);
+        let res = client.json(&body).send().await?;
+        info!("status {:?}", res.status());
+        Ok(res.status().is_success())
     }
-    async fn update<T>(&self, endpoint: String, body: Value) -> Response<T>
+
+    async fn delete(&self, endpoint: String) -> Response<bool> {
+        let client = self.make_request(endpoint, Method::DELETE);
+        Ok(client.send().await?.json::<Value>().await.is_ok())
+    }
+    async fn put<T>(&self, endpoint: String, body: Value) -> Response<T>
     where
         T: DeserializeOwned,
     {
@@ -45,6 +50,12 @@ pub trait CoreRequest {
         let result = client.json(&body).send().await?.json::<Value>().await?;
         get_response(result)
     }
+
+    async fn put_without_parse_body(&self, endpoint: String, body: Value) -> Response<bool> {
+        let client = self.make_request(endpoint, Method::PUT);
+        Ok(client.json(&body).send().await?.status().is_success())
+    }
+
     fn get_client(&self) -> &Client;
 
     fn make_request(&self, endpoint: String, method: Method) -> RequestBuilder {

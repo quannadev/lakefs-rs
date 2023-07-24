@@ -1,8 +1,9 @@
+pub mod group_api;
 pub mod repositories;
-mod repository_data;
+pub mod repository_data;
 pub mod setup;
-mod setup_data;
+pub mod setup_data;
 pub mod users;
-mod users_data;
+pub mod users_data;
 
 pub use setup_data::AuthInfo;

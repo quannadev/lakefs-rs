@@ -4,6 +4,7 @@ use crate::api::sub_api::users_data::{UserAuthInfo, UserLakefs};
 use crate::api::sub_api::AuthInfo;
 use crate::LakeApiEndpoint::Users;
 use crate::{QueryData, ResultData};
+use serde_json::json;
 
 #[derive(Clone, Debug)]
 pub struct UserApi {
@@ -13,6 +14,15 @@ pub struct UserApi {
 impl UserApi {
     pub fn new(client: ClientCore) -> Self {
         Self { client }
+    }
+
+    pub async fn create_user(&self, user_name: String, is_invite: bool) -> Response<UserLakefs> {
+        let url = self.client.get_url(Users(None));
+        let body = json!({
+          "id": user_name,
+          "invite_user": is_invite
+        });
+        self.client.post(url, body).await
     }
 
     pub async fn get_users(&self, queries: QueryData) -> Response<ResultData<Vec<UserLakefs>>> {
