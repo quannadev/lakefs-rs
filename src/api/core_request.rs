@@ -1,3 +1,4 @@
+use crate::api::sub_api::object_data::FileHeadInfo;
 use crate::errors::ClientError;
 use crate::utils::get_response;
 use crate::{Config, LakeApiEndpoint, QueryData};
@@ -6,6 +7,7 @@ use log::info;
 use reqwest::{Client, Method, RequestBuilder};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+
 pub type Response<T> = Result<T, ClientError>;
 
 #[async_trait]
@@ -40,7 +42,11 @@ pub trait CoreRequest {
 
     async fn delete(&self, endpoint: String) -> Response<bool> {
         let client = self.make_request(endpoint, Method::DELETE);
-        Ok(client.send().await?.json::<Value>().await.is_ok())
+        Ok(client.send().await?.status().is_success())
+    }
+    async fn delete_with_query(&self, endpoint: String, queries: QueryData) -> Response<bool> {
+        let client = self.make_request(endpoint, Method::DELETE);
+        Ok(client.query(&queries).send().await?.status().is_success())
     }
     async fn put<T>(&self, endpoint: String, body: Value) -> Response<T>
     where
@@ -49,6 +55,16 @@ pub trait CoreRequest {
         let client = self.make_request(endpoint, Method::PUT);
         let result = client.json(&body).send().await?.json::<Value>().await?;
         get_response(result)
+    }
+
+    async fn get_file_head_info(
+        &self,
+        endpoint: String,
+        query: QueryData,
+    ) -> Response<FileHeadInfo> {
+        let client = self.make_request(endpoint, Method::HEAD);
+        let res = client.query(&query).send().await?;
+        FileHeadInfo::try_from(res.headers().clone())
     }
 
     async fn put_without_parse_body(&self, endpoint: String, body: Value) -> Response<bool> {

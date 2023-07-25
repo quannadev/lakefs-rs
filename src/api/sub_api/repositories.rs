@@ -6,7 +6,7 @@ use crate::api::sub_api::repository_data::{
 use crate::LakeApiEndpoint::{Branches, Repository, Tags};
 use crate::{QueryData, ResultData};
 use log::info;
-use serde_json::{json, Value};
+use serde_json::json;
 
 #[derive(Clone, Debug)]
 pub struct RepositoriesApi {
