@@ -1,7 +1,5 @@
 #![allow(dead_code)]
-use crate::errors::ClientError;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 pub enum LakeApiEndpoint {
     PreSetup,
