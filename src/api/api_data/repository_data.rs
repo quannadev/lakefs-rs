@@ -1,14 +1,14 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct RepositoryMetadata {
     #[serde(rename = "additionalProp1")]
-    additional_prop1: String,
+    additional_prop1: Option<String>,
     #[serde(rename = "additionalProp2")]
-    additional_prop2: String,
+    additional_prop2: Option<String>,
     #[serde(rename = "additionalProp3")]
-    additional_prop3: String,
+    additional_prop3: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -40,11 +40,11 @@ pub struct DiffItem {
     size_bytes: u64,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub struct CommitBody {
     pub message: String,
-    pub meta: RepositoryMetadata,
-    pub date: u64,
+    pub meta: Option<RepositoryMetadata>,
+    pub date: Option<u64>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -66,9 +66,9 @@ mod tests {
         let json_str =
             r#"{"additionalProp1":"value1","additionalProp2":"value2","additionalProp3":"value3"}"#;
         let parsed_data: RepositoryMetadata = serde_json::from_str(json_str).unwrap();
-        assert_eq!(parsed_data.additional_prop1, "value1");
-        assert_eq!(parsed_data.additional_prop2, "value2");
-        assert_eq!(parsed_data.additional_prop3, "value3");
+        assert_eq!(parsed_data.additional_prop1.unwrap(), "value1");
+        assert_eq!(parsed_data.additional_prop2.unwrap(), "value2");
+        assert_eq!(parsed_data.additional_prop3.unwrap(), "value3");
     }
     #[test]
     fn test_repositories_struct_from_json() {
