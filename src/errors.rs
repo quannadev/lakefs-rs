@@ -12,4 +12,6 @@ pub enum ClientError {
     Serialization(#[from] serde_json::Error),
     #[error("request error: {0}")]
     RequestFail(String),
+    #[error("parser error: {0}")]
+    Parse(String)
 }

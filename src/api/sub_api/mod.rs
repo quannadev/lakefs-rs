@@ -1,4 +1,6 @@
 pub mod group_api;
+pub mod object_api;
+pub mod object_data;
 pub mod repositories;
 pub mod repository_data;
 pub mod setup;

@@ -1,4 +1,5 @@
 use crate::errors::ClientError;
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 use std::env;
@@ -28,4 +29,16 @@ where
             Err(ClientError::RequestFail(message))
         }
     }
+}
+
+pub fn parse_str_to_timestamp(date_time_str: &str) -> i64 {
+    let format_str = "%a, %d %b %Y %H:%M:%S %Z";
+    let naive_date_time = NaiveDateTime::parse_from_str(date_time_str, format_str)
+        .expect("Failed to parse date and time");
+
+    // Convert the NaiveDateTime into a DateTime with UTC timezone
+    let date_time_utc: DateTime<Utc> = Utc.from_utc_datetime(&naive_date_time);
+
+    // Get the timestamp (UNIX timestamp)
+    date_time_utc.timestamp()
 }

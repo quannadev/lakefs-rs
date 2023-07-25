@@ -1,5 +1,7 @@
 #![allow(dead_code)]
+use crate::errors::ClientError;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 pub enum LakeApiEndpoint {
     PreSetup,
@@ -11,6 +13,7 @@ pub enum LakeApiEndpoint {
     Users(Option<String>),
     Tags((String, Option<String>)),
     UserGroup(Option<String>),
+    RefsObj(String, String, Option<String>),
 }
 
 impl From<LakeApiEndpoint> for String {
@@ -69,6 +72,21 @@ impl From<LakeApiEndpoint> for String {
                 "{}/tags",
                 String::from(LakeApiEndpoint::Repository(Some(repo_name)))
             ),
+            LakeApiEndpoint::RefsObj(repo_name, branch_name, path) => path.map_or(
+                format!(
+                    "{}/refs/{}/objects",
+                    String::from(LakeApiEndpoint::Repository(Some(repo_name.clone()))),
+                    branch_name
+                ),
+                |p| {
+                    format!(
+                        "{}/refs/{}/objects/{}",
+                        String::from(LakeApiEndpoint::Repository(Some(repo_name))),
+                        branch_name,
+                        p
+                    )
+                },
+            ),
         }
     }
 }
@@ -87,10 +105,28 @@ pub struct ResultData<T> {
     pub results: T,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct QueryData {
-    pub after: Option<String>,
-    pub amount: Option<u64>,
-    pub prefix: Option<String>,
-    pub delimiter: Option<String>,
+    pub after: String,
+    pub amount: u64,
+    pub prefix: String,
+    pub delimiter: String,
+    pub user_metadata: bool,
+    pub presign: bool,
+    #[serde(rename = "path")]
+    pub file_name: String,
+}
+
+impl Default for QueryData {
+    fn default() -> Self {
+        Self {
+            after: String::new(),
+            amount: 100,
+            prefix: String::new(),
+            delimiter: String::new(),
+            user_metadata: false,
+            presign: false,
+            file_name: String::new(),
+        }
+    }
 }
