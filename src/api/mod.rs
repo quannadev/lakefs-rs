@@ -5,7 +5,8 @@ pub mod lakefs_client;
 pub mod lakefs_config;
 mod sub_api;
 pub use sub_api::{
-    group_api::GroupApi, repositories::RepositoriesApi, setup::SetupApi, users::UserApi,
+    group_api::GroupApi, object_data::*, repositories::RepositoriesApi, setup::SetupApi,
+    setup_data::*, users::UserApi, users_data::*,
 };
 #[cfg(test)]
 mod tests;

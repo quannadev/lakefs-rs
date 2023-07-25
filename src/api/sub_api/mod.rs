@@ -8,4 +8,5 @@ pub mod setup_data;
 pub mod users;
 pub mod users_data;
 
+pub use repository_data::CommitBody;
 pub use setup_data::AuthInfo;
