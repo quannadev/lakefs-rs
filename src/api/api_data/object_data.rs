@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
-use crate::api::sub_api::repository_data::RepositoryMetadata;
 use crate::errors::ClientError;
 use crate::utils::parse_str_to_timestamp;
+use crate::RepositoryMetadata;
 use reqwest::header::HeaderMap;
 use serde::Deserialize;
 

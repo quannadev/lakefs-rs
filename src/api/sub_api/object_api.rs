@@ -1,9 +1,8 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
-use crate::api::sub_api::object_data::{FileHeadInfo, ObjectItem};
+use crate::api::LakeApiEndpoint::{Branches, RefsObj};
 use crate::errors::ClientError;
-use crate::LakeApiEndpoint::{Branches, RefsObj};
-use crate::{QueryData, ResultData};
+use crate::{FileHeadInfo, ObjectItem, QueryData, ResultData};
 
 #[derive(Clone, Debug)]
 pub struct ObjectApi {

@@ -1,10 +1,10 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
-use crate::api::sub_api::repository_data::{
-    BranchInfo, CommitBody, CommitData, DiffItem, RepositoryInfo, RepositoryMetadata, RevertInfo,
+use crate::api::LakeApiEndpoint::{Branches, Repository, Tags};
+use crate::{
+    BranchInfo, CommitBody, CommitData, DiffItem, QueryData, RepositoryInfo, RepositoryMetadata,
+    ResultData, RevertInfo,
 };
-use crate::LakeApiEndpoint::{Branches, Repository, Tags};
-use crate::{QueryData, ResultData};
 use log::info;
 use serde_json::json;
 
