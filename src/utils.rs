@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::errors::ClientError;
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::de::DeserializeOwned;

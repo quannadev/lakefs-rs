@@ -13,5 +13,5 @@ pub enum ClientError {
     #[error("request error: {0}")]
     RequestFail(String),
     #[error("parser error: {0}")]
-    Parse(String)
+    Parse(String),
 }
