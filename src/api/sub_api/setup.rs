@@ -1,8 +1,8 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
-use crate::api::sub_api::setup_data::{AuthInfo, BlockstoreConfig, LakefsVersion};
+use crate::api::LakeApiEndpoint::{Config, PreSetup, SetupAdmin};
 use crate::errors::ClientError;
-use crate::LakeApiEndpoint::{Config, PreSetup, SetupAdmin};
+use crate::{AuthInfo, BlockstoreConfig, LakefsVersion};
 use log::info;
 use serde_json::{json, Value};
 

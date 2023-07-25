@@ -1,7 +1,7 @@
-use crate::api::sub_api::object_data::FileHeadInfo;
+use crate::api::LakeApiEndpoint;
 use crate::errors::ClientError;
 use crate::utils::get_response;
-use crate::{Config, LakeApiEndpoint, QueryData};
+use crate::{Config, FileHeadInfo, QueryData};
 use async_trait::async_trait;
 use log::info;
 use reqwest::{Client, Method, RequestBuilder};

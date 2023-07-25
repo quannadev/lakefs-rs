@@ -1,12 +1,13 @@
-pub mod api_requests;
+mod api_requests;
 mod client_core;
 mod core_request;
-pub mod lakefs_client;
-pub mod lakefs_config;
+mod lakefs_client;
+mod lakefs_config;
 mod sub_api;
-pub use sub_api::{
-    group_api::GroupApi, object_data::*, repositories::RepositoriesApi, setup::SetupApi,
-    setup_data::*, users::UserApi, users_data::*,
-};
+pub use lakefs_client::LakeFsClient;
+pub use lakefs_config::Config;
+pub use sub_api::{group_api::GroupApi, repositories::RepositoriesApi, setup::SetupApi};
+pub mod api_data;
+pub use api_requests::*;
 #[cfg(test)]
 mod tests;

@@ -5,8 +5,7 @@ use crate::api::sub_api::object_api::ObjectApi;
 use crate::api::sub_api::repositories::RepositoriesApi;
 use crate::api::sub_api::setup::SetupApi;
 use crate::api::sub_api::users::UserApi;
-use crate::api::sub_api::AuthInfo;
-use crate::Config;
+use crate::{AuthInfo, Config};
 
 #[derive(Clone, Debug)]
 pub struct LakeFsClient {

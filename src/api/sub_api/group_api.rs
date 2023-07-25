@@ -1,8 +1,7 @@
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
-use crate::api::sub_api::users_data::{GroupItem, UserLakefs};
-use crate::LakeApiEndpoint::UserGroup;
-use crate::{QueryData, ResultData};
+use crate::api::LakeApiEndpoint::UserGroup;
+use crate::{GroupItem, QueryData, ResultData, UserLakefs};
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug)]

@@ -1,9 +1,7 @@
+use crate::api::api_requests::LakeApiEndpoint::Users;
 use crate::api::client_core::ClientCore;
 use crate::api::core_request::{CoreRequest, Response};
-use crate::api::sub_api::users_data::{UserAuthInfo, UserLakefs};
-use crate::api::sub_api::AuthInfo;
-use crate::LakeApiEndpoint::Users;
-use crate::{QueryData, ResultData};
+use crate::{AuthInfo, QueryData, ResultData, UserAuthInfo, UserLakefs};
 use serde_json::json;
 
 #[derive(Clone, Debug)]
