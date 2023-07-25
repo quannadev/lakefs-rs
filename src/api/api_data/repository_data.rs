@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
@@ -40,11 +42,21 @@ pub struct DiffItem {
     size_bytes: u64,
 }
 
-#[derive(Debug, Deserialize, Serialize, Default)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CommitBody {
     pub message: String,
-    pub meta: Option<RepositoryMetadata>,
-    pub date: Option<u64>,
+    pub meta: RepositoryMetadata,
+    pub date: i64,
+}
+
+impl Default for CommitBody {
+    fn default() -> Self {
+        Self {
+            message: String::new(),
+            meta: RepositoryMetadata::default(),
+            date: Utc::now().timestamp(),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
